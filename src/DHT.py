@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Optional
+from typing import Any, List, Tuple, Optional, NewType
 import math
 
 from node import Node
@@ -33,15 +33,14 @@ class DistributedHashTable:
         assert node.get_id <= 2 ** self.k - 1 # trasformare in exception
 
         if self.nodes[node.get_id] != None:
-            return -1 # cannot add node here because position is occupied
+            raise Exception(f"Cannot add node with id={node.get_id} becasue there already is a node with this id.")
         
-        # devo trovare un modo per aggiornare il next del nodo precedente a quello che aggiungo
         self.nodes[node.get_id] = node
         self.start = min(self.start, node.get_id)
         self.counter += 1
         if self.counter > 1:
-            self.__update_prev_node_next(node)
-            node.FT[0] = self.__find_next(node)
+            self.__update_prev_node_next(node) # move this method to the node class?
+            node.successor = self.__find_next(node) # move this method to the node class?
 
     def linear_search_resource(self, resource_id: int):
         for node in self:
