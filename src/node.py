@@ -10,18 +10,17 @@ class Node:
         self.k: int = k
         self.FT: list[int] = [-1 for _ in range(0, self.k)]
         self.resources: list[Any] = []
-        self.next: int = None
     
     def __repr__(self) -> str:
-        return f"Node(id={self.id}, next = {self.next})"
+        return f"Node(id={self.id}, next = {self.successor})"
 
     @property
     def get_id(self) -> int:
         return self.id
     
     @property
-    def get_next(self) -> int:
-        return self.next
+    def successor(self) -> int:
+        return self.FT[0]
     
     def is_in(self, resource) -> bool:
         for el in self.resources:

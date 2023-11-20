@@ -21,14 +21,15 @@ class DistributedHashTable:
         if self.is_empty:
             raise Exception("Cannot iterate over empty table.")
         
-        idx = self.start
+        idx = int(self.start)
 
-        while self.nodes[idx].get_next != self.start:
+        while self.nodes[idx].successor != self.start:
             yield self.nodes[idx]
-            idx = (self.nodes[idx].get_next) % (2 ** self.k - 1)
+            idx = (self.nodes[idx].successor) % (2 ** self.k - 1)
         # nel ciclo while rimase escluso l'ultimo, lo faccio qui
         yield self.nodes[idx]
 
+    """
     def add_node(self, node: Node):
         assert node.get_id <= 2 ** self.k - 1 # trasformare in exception
 
@@ -41,7 +42,7 @@ class DistributedHashTable:
         self.counter += 1
         if self.counter > 1:
             self.__update_prev_node_next(node)
-            node.next = self.__find_next(node)
+            node.FT[0] = self.__find_next(node)
 
     def search(self, input_id: int):
         for node in self:
