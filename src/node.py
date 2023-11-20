@@ -22,8 +22,15 @@ class Node:
     def successor(self) -> int:
         return self.FT[0]
     
+    @successor.setter
+    def successor(self, value):
+        self.FT[0] = value
+    
     def is_in(self, resource) -> bool:
         for el in self.resources:
             if el == resource:
                 return True
         return False
+    
+    def add_resource(self, value: Any):
+        self.resources.append(value)

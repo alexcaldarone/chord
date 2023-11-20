@@ -29,7 +29,6 @@ class DistributedHashTable:
         # nel ciclo while rimase escluso l'ultimo, lo faccio qui
         yield self.nodes[idx]
 
-    """
     def add_node(self, node: Node):
         assert node.get_id <= 2 ** self.k - 1 # trasformare in exception
 
@@ -44,11 +43,12 @@ class DistributedHashTable:
             self.__update_prev_node_next(node)
             node.FT[0] = self.__find_next(node)
 
-    def search(self, input_id: int):
+    def linear_search_resource(self, resource_id: int):
         for node in self:
-            if node.get_id == input_id:
-                return node.get_id
-        
+            if node.get_id >= resource_id:
+                if node.is_in(resource_id):
+                    return node.get_id
+                return -1
         return -1
     
     def __update_prev_node_next(self, node: Node):
@@ -58,7 +58,7 @@ class DistributedHashTable:
         while idx != node.get_id and self.nodes[idx] == None:
             idx = (idx - 1) % (2 ** self.k - 1)
         
-        self.nodes[idx].next = node.id
+        self.nodes[idx].successor = node.id
 
 
     def __find_next(self, node: Node):
@@ -74,12 +74,14 @@ if __name__ == "__main__":
     d = DistributedHashTable(3)
     d.add_node(Node(id = 0, k = 3))
     d.add_node(Node(id = 2, k = 3))
-    d.add_node(Node(id = 5, k = 3))
-    d.add_node(Node(id = 6, k = 3))
+    d.add_node(Node(id = 4, k = 3))
+    node1 = Node(id = 6, k = 3)
+    node1.add_resource(5)
+    d.add_node(node1)
     print(d.nodes)
     print(d.k)
 
     for el in d:
         print(el)
 
-    d.search(5)
+    print(f"Resource {5} is in node: {d.linear_search_resource(5)}")
