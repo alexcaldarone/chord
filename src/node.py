@@ -1,4 +1,5 @@
 from typing import Any
+import numpy as np
 
 class Node:
     """
@@ -10,13 +11,10 @@ class Node:
         self.k: int = k
         self.FT: list[int] = [-1 for _ in range(0, self.k)] # nella ft ci vanno i nodi non gli id
         self.resources: list[Any] = []
+        self.predecessor = None
     
     def __repr__(self) -> str:
         return f"Node(id={self.id}, next = {self.successor})"
-
-    @property
-    def get_id(self) -> int:
-        return self.id
     
     @property
     def successor(self) -> int:
@@ -26,15 +24,22 @@ class Node:
     def successor(self, value: int):
         self.FT[0] = value
     
-    def is_in(self, resource: Any) -> bool:
+    def is_in(self, resource_id: int) -> bool:
         for el in self.resources:
-            if el == resource:
+            if el == resource_id:
                 return True
         return False
     
     def add_resource(self, value: Any):
         self.resources.append(value)
     
+    def get_closest(self, resource_id: int) -> int:
+        # find the closest inedx in the finger table to the resource index
+        distances = [abs(node_id - resource_id) for node_id in self.FT]
+        min_idx = np.argmin(distances)
+
+        return self.FT[min_idx]
+
     def find_successor(self, id: int):
         # ask node to find id's successor
         n_first = self.find_predecessor(id)
@@ -53,3 +58,25 @@ class Node:
             if self.FT[i] > self.id and self.FT[i] < id:
                 return self.FT[i]
         return self
+
+    def join(self, other, network):
+        # function that sets this node as the predecessor of node other
+        # on the dht network
+        network.nodes[self.id] = self
+        self.successor = other.find_successor(self.id)
+
+    def stabilize(self, network):
+        # periodically verify the node's immediate successor
+        # and tell the other successor about it
+        x = network.nodes[self.successor].predecessor # prendo il predecessore del successore sull'anello
+        if x not in (self.id, self.successor):
+            self.successor = x
+        network.nodes[self.successor].notify(self.id)
+
+    def notify(self, other, network):
+        if self.predecessor == None or other.id in (self.predecessor, self.id):
+            self.predecessor = other.id
+
+    def fix_fingers(self):
+        # periodically refresh finger table entries
+        pass

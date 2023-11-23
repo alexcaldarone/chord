@@ -28,42 +28,66 @@ class DistributedHashTable:
             idx = (self.nodes[idx].successor) % (2 ** self.k - 1)
         # nel ciclo while rimase escluso l'ultimo, lo faccio qui
         yield self.nodes[idx]
+    
+    def __getitem__(self, idx):
+        if self.nodes[idx] == None:
+            raise IndexError("Cannot index where there is no node")
+        return self.nodes[idx]
 
+    # delete all this code? How do i do new insert? On node class or dht table?
     def add_node(self, node: Node):
-        assert node.get_id <= 2 ** self.k - 1 # trasformare in exception
+        assert node.id <= 2 ** self.k - 1 # trasformare in exception
 
-        if self.nodes[node.get_id] != None:
-            raise Exception(f"Cannot add node with id={node.get_id} becasue there already is a node with this id.")
+        if self.nodes[node.id] != None:
+            raise Exception(f"Cannot add node with id={node.id} becasue there already is a node with this id.")
         
-        self.nodes[node.get_id] = node
-        self.start = min(self.start, node.get_id)
+        self.nodes[node.id] = node
+        self.start = min(self.start, node.id)
         self.counter += 1
         if self.counter > 1:
             self.__update_prev_node_next(node) # move this method to the node class?
-            node.successor = self.__find_next(node) # move this method to the node class?
+            node.successor = self.succ(node.id) # move this method to the node class?
 
     def linear_search_resource(self, resource_id: int):
         for node in self:
-            if node.get_id >= resource_id:
+            if node.id >= resource_id:
                 if node.is_in(resource_id):
-                    return node.get_id
+                    return node.id
                 return -1
         return -1
     
+    def search(self, resource_id: int, node_id: int = None):
+        node_id = self.start if node_id is None else node_id
+        # logarithmic research
+        node = self[node_id]
+        
+        if node.is_in(resource_id):
+            return node_id
+        else:
+            new_node_idx = node.get_closest(resource_id)
+            new_node = self.nodes[new_node_idx]
+            if node.successor == new_node.id:
+                if new_node.is_in(resource_id):
+                    return new_node
+                else:
+                    raise LookupError("Resource not found in DHT")
+            else:
+                return self.search(resource_id, new_node.id)
+    
     def __update_prev_node_next(self, node: Node):
         # caso in cui ho due nodi
-        idx = (node.get_id - 1) % (2 ** self.k - 1)
+        idx = (node.id - 1) % (2 ** self.k - 1)
 
-        while idx != node.get_id and self.nodes[idx] == None:
+        while idx != node.id and self.nodes[idx] == None:
             idx = (idx - 1) % (2 ** self.k - 1)
         
         self.nodes[idx].successor = node.id
 
 
-    def __find_next(self, node: Node):
-        idx = (node.get_id + 1) % (2 ** self.k - 1)
+    def succ(self, start_id: int):
+        idx = (start_id + 1) % (2 ** self.k - 1)
 
-        while idx != node.get_id and self.nodes[idx] == None:
+        while idx != start_id and self.nodes[idx] == None:
             idx = (idx + 1) % (2 ** self.k - 1)
         
         return idx
@@ -81,6 +105,12 @@ if __name__ == "__main__":
     print(d.k)
 
     for el in d:
-        print(el)
+        for idx in range(1, len(el.FT)):
+            el.FT[idx] = d.succ(2 ** (idx - 1))
+    
+    for el in d:
+        print(el.FT)
 
+    
     print(f"Resource {5} is in node: {d.linear_search_resource(5)}")
+    print(f"Resource {5} is in node: {d.search(5)}")
