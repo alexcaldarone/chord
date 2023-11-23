@@ -11,7 +11,7 @@ class Node:
         self.k: int = k
         self.FT: list[int] = [-1 for _ in range(0, self.k)] # nella ft ci vanno i nodi non gli id
         self.resources: list[Any] = []
-        self.predecessor = None
+        self.predecessor: int = None
     
     def __repr__(self) -> str:
         return f"Node(id={self.id}, next = {self.successor})"

@@ -46,6 +46,8 @@ class DistributedHashTable:
         self.counter += 1
         if self.counter > 1:
             self.__update_prev_node_next(node) # move this method to the node class?
+            # make sure that also the first node has a predecessor set to the
+            # last node of the ring
             node.successor = self.succ(node.id) # move this method to the node class?
 
     def linear_search_resource(self, resource_id: int):
@@ -82,6 +84,7 @@ class DistributedHashTable:
             idx = (idx - 1) % (2 ** self.k - 1)
         
         self.nodes[idx].successor = node.id
+        node.predecessor = self.nodes[idx].id
 
 
     def succ(self, start_id: int):
@@ -109,7 +112,7 @@ if __name__ == "__main__":
             el.FT[idx] = d.succ(2 ** (idx - 1))
     
     for el in d:
-        print(el.FT)
+        print(el, el.predecessor)
 
     
     print(f"Resource {5} is in node: {d.linear_search_resource(5)}")
