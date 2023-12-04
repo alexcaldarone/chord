@@ -7,7 +7,7 @@ class DistributedHashTable:
     def __init__(self, k: int):
         self.counter: int = 0
         self.k: int = k
-        self.nodes: list[Node] = [None for _ in range(0, 2**k - 1)]
+        self.nodes: list[Node] = [None for _ in range(0, 2**k)]
         self.start = math.inf
     
     @property
@@ -137,12 +137,13 @@ if __name__ == "__main__":
     print(test_node.FT)
     print(test_node.successor)
     print(d2.nodes)
+    test_node.add_resource(0)
     print(node_1.predecessor)
     test_node.stabilize(network = d2)
     print(d2.nodes)
     print(d2.nodes)
-    #node_1.fix_fingers()
-    #print(node_1.FT)
+    node_1.fix_fingers()
+    print(node_1.FT)
     #test_node.fix_fingers()
     test_node_2 = Node(id = 2, k = 3)
     test_node_2.join(d2, node_1)
@@ -154,9 +155,11 @@ if __name__ == "__main__":
     test_node.notify(node_1)
     test_node.stabilize(d2)
     print(d2.nodes)
-    print("before fix_fingers:", test_node.FT)
-    test_node.fix_fingers()
-    print(test_node.FT)
+    print("node_1 FT:", node_1.FT)
+    #print("before fix_fingers:", test_node.FT)
+    #print(test_node.FT)
+    #node_1.stabilize(d2)
+
     # in questa dht vorrei che 0 avesse come pred e succ 3
     # mentre 3 deve avere come succ e pred 0
     # però non avviene, perche?

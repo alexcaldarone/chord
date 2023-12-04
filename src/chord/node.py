@@ -3,12 +3,15 @@ import numpy as np
 import asyncio
 
 from helpers import is_between
+from resources import ResourceStorage
 
 class Node:
     """
     Implementation of a node belonging to a Distributed Hash Table
     """
     def __init__(self, id: int, k: int) -> None:
+        # do i want to define the possibilty of defining a new node 
+        # with a given resource storage 
         assert id <= 2**k - 1
         self.id: int = int(id)
         self.k: int = k
@@ -17,7 +20,7 @@ class Node:
         self.resources: list[Any] = []
         self.predecessor: int = None
 
-        self.DIRECT_SUCC = self.k
+        self.__DIRECT_SUCC = self.k
     
     def __repr__(self) -> str:
         return f"Node(id={self.id}, next = {self.successor}, pred={self.predecessor})"
@@ -57,7 +60,7 @@ class Node:
 
         # initialize direct successor list with successor's id if we have
         # a successor, otherwise use node's id
-        self.successor_list = [id for _ in range(self.DIRECT_SUCC)]
+        self.successor_list = [id for _ in range(self.__DIRECT_SUCC)]
     
     # how do i manage adding node to empty dht?
     def join(self, network, other = None):
@@ -123,8 +126,6 @@ class Node:
         print("id del nodo che chiama la funzione", self.id)
         for i in range(self.k-1, -1, -1):
             print(self.FT[i])
-            # qui non va perche ho una FT piena di -1 e non 
-            # ho mai la condizione per uscire
             if is_between(self.FT[i],
                           self.id,
                           id):
@@ -155,6 +156,7 @@ class Node:
                                           self.id,
                                           self.successor):
             self.successor = x
+
         network.nodes[self.successor].notify(self)
 
     def notify(self, other):
@@ -171,5 +173,5 @@ class Node:
         # periodically refresh finger table entries
         i = np.random.randint(low = 0, high = self.k)
         print("i", i)
-        print("starting id:", self.id + 2**(i-1) % 2**self.k)
-        self.FT[i] = self.__find_successor(self.id + 2**(i-1) % 2**self.k)
+        print("starting id:", (self.id + 2**i) % 2**self.k)
+        self.FT[i] = self.__find_successor((self.id + 2**i) % 2**self.k)
