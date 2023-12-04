@@ -141,15 +141,22 @@ if __name__ == "__main__":
     test_node.stabilize(network = d2)
     print(d2.nodes)
     print(d2.nodes)
-    node_1.fix_fingers()
-    print(node_1.FT)
+    #node_1.fix_fingers()
+    #print(node_1.FT)
     #test_node.fix_fingers()
-    #test_node_2 = Node(id = 2, k = 3)
-    #test_node_2.join(node_1, d2)
-    #print(d2.nodes)
-    #node_1.stabilize(d2)
-    #print(d2.nodes)
-
+    test_node_2 = Node(id = 2, k = 3)
+    test_node_2.join(d2, node_1)
+    print(d2.nodes)
+    test_node_2.stabilize(network=d2)
+    print(d2.nodes)
+    test_node_2.notify(test_node)
+    print(d2.nodes)
+    test_node.notify(node_1)
+    test_node.stabilize(d2)
+    print(d2.nodes)
+    print("before fix_fingers:", test_node.FT)
+    test_node.fix_fingers()
+    print(test_node.FT)
     # in questa dht vorrei che 0 avesse come pred e succ 3
     # mentre 3 deve avere come succ e pred 0
     # però non avviene, perche?
@@ -158,3 +165,8 @@ if __name__ == "__main__":
 
     # ipotesi: se un nodo è il primo ad esskere aggiunto 
     # al network la sua DHT contiene solo il suo ids
+
+
+    # current problem: i need to make sure that node 3 finds node
+    # 0 as his successor. 
+    # possible solution: make the is_between algebra modular?

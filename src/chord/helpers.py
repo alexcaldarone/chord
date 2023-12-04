@@ -1,6 +1,6 @@
 def is_between(id: int,
-               upper_bound: int,
                lower_bound: int,
+               upper_bound: int,
                include_upper: bool = False,
                include_lower: bool = False):
     
