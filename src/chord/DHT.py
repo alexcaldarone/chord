@@ -44,7 +44,7 @@ class DistributedHashTable:
         self.nodes[node.id] = node
         self.start = min(self.start, node.id)
         self.counter += 1
-        if self.counter > 1:
+        if self.counter >= 1:
             self.__update_prev_node_next(node) # move this method to the node class?
             # make sure that also the first node has a predecessor set to the
             # last node of the ring
@@ -88,6 +88,10 @@ class DistributedHashTable:
 
 
     def succ(self, start_id: int):
+        # with empty table node is his own successor
+        if self.counter == 1:
+            return start_id
+        
         idx = (start_id + 1) % (2 ** self.k - 1)
 
         while idx != start_id and self.nodes[idx] == None:
@@ -97,7 +101,7 @@ class DistributedHashTable:
 
 
 if __name__ == "__main__":
-    d = DistributedHashTable(3)
+    """d = DistributedHashTable(3)
     d.add_node(Node(id = 0, k = 3))
     d.add_node(Node(id = 2, k = 3))
     d.add_node(Node(id = 4, k = 3))
@@ -116,4 +120,41 @@ if __name__ == "__main__":
 
     
     print(f"Resource {5} is in node: {d.linear_search_resource(5)}")
-    print(f"Resource {5} is in node: {d.search(5)}")
+    print(f"Resource {5} is in node: {d.search(5)}")"""
+
+    # network 2
+    d2 = DistributedHashTable(3)
+    node_1 = Node(id = 3, k = 3)
+    print(node_1.FT)
+    print(node_1.successor)
+    node_1.join(d2)
+    print(d2.nodes)
+    print(node_1.successor)
+    print(node_1.FT)
+    test_node = Node(id = 0, k = 3)
+    print(test_node.FT)
+    test_node.join(d2, d2[3])
+    print(test_node.FT)
+    print(test_node.successor)
+    print(d2.nodes)
+    print(node_1.predecessor)
+    test_node.stabilize(network = d2)
+    print(d2.nodes)
+    print(d2.nodes)
+    node_1.fix_fingers()
+    print(node_1.FT)
+    #test_node.fix_fingers()
+    #test_node_2 = Node(id = 2, k = 3)
+    #test_node_2.join(node_1, d2)
+    #print(d2.nodes)
+    #node_1.stabilize(d2)
+    #print(d2.nodes)
+
+    # in questa dht vorrei che 0 avesse come pred e succ 3
+    # mentre 3 deve avere come succ e pred 0
+    # però non avviene, perche?
+
+    # il nodo 2 non è agganciato a nessun altro
+
+    # ipotesi: se un nodo è il primo ad esskere aggiunto 
+    # al network la sua DHT contiene solo il suo ids
