@@ -1,7 +1,7 @@
 from typing import Any, List, Tuple, Optional, NewType
 import math
 
-from node import Node
+from chord.node import Node
 
 class DistributedHashTable:
     def __init__(self, k: int):

@@ -2,8 +2,8 @@ from typing import Any, Optional, List, NewType
 import numpy as np
 import asyncio
 
-from helpers import is_between, is_between_reverse
-from resources import ResourceStorage
+from chord.helpers import is_between, is_between_reverse
+from chord.resources import ResourceStorage
 
 class Node:
     """
