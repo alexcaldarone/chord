@@ -156,10 +156,12 @@ if __name__ == "__main__":
     test_node.stabilize(d2)
     print(d2.nodes)
     print("node_1 FT:", node_1.FT)
-    #print("before fix_fingers:", test_node.FT)
-    #print(test_node.FT)
-    #node_1.stabilize(d2)
-
+    print("before fix_fingers:", test_node.FT)
+    print(test_node.FT)
+    node_1.stabilize(d2)
+    print(d2.nodes)
+    test_node.notify(node_1)
+    print(d2.nodes)
     # in questa dht vorrei che 0 avesse come pred e succ 3
     # mentre 3 deve avere come succ e pred 0
     # però non avviene, perche?

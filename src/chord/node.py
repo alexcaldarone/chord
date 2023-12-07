@@ -2,7 +2,7 @@ from typing import Any, Optional, List, NewType
 import numpy as np
 import asyncio
 
-from helpers import is_between
+from helpers import is_between, is_between_reverse
 from resources import ResourceStorage
 
 class Node:
@@ -168,6 +168,15 @@ class Node:
                                                     self.id):
                 print("inside if", self, self.predecessor)
                 self.predecessor = other.id
+        
+        try:
+            if is_between_reverse(self.id,
+                                  other.id,
+                                  self.successor,
+                                  self.k):
+                other.successor = self.id
+        except AssertionError:
+            pass
 
     def fix_fingers(self):
         # periodically refresh finger table entries
