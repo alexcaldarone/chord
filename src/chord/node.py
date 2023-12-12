@@ -44,10 +44,12 @@ class Node:
     
     def get_closest(self, resource_id: int) -> int:
         # find the closest inedx in the finger table to the resource index
-        distances = [abs(node_id - resource_id) for node_id in self.FT]
-        min_idx = np.argmin(distances)
+        # cambia questo?
+        for idx in range(self.k-1, -1, -1):
+            if self.FT[idx] < resource_id:
+                return self.FT[idx]
 
-        return self.FT[min_idx]
+        return self.FT[0]
     
     def __init_empty_ft(self):
         # if node has a successor inherit its finger table,

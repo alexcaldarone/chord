@@ -58,23 +58,24 @@ class DistributedHashTable:
                 return -1
         return -1
     
-    def search(self, resource_id: int, node_id: int = None):
+    def search(self, resource_id: int, node_id: int = None, k = 0):
         node_id = self.start if node_id is None else node_id
         # logarithmic research
         node = self[node_id]
-        
+        print("res:", resource_id, "node:", node)
         if node.is_in(resource_id):
             return node_id
         else:
             new_node_idx = node.get_closest(resource_id)
+            print("new_node_idx", new_node_idx)
             new_node = self.nodes[new_node_idx]
             if node.successor == new_node.id:
                 if new_node.is_in(resource_id):
-                    return new_node
+                    return new_node, k
                 else:
                     raise LookupError("Resource not found in DHT")
             else:
-                return self.search(resource_id, new_node.id)
+                return self.search(resource_id, new_node.id, k+1)
     
     def __update_prev_node_next(self, node: Node):
         # caso in cui ho due nodi
@@ -94,7 +95,7 @@ class DistributedHashTable:
         
         idx = (start_id + 1) % (2 ** self.k - 1)
 
-        while idx != start_id and self.nodes[idx] == None:
+        while self.nodes[idx] == None:
             idx = (idx + 1) % (2 ** self.k - 1)
         
         return idx
