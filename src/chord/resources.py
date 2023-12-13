@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Set, Optional
 
 class Resource:    
     def __init__(self, 
@@ -14,13 +14,15 @@ class Resource:
     def __repr__(self):
         return f"Resource(id={self.id})"
     
+    def __hash__(self):
+        return self.id
     # think of other useful methods
 
 
 class ResourceStorage:
     def __init__(self,
-                 resource_list: Optional[List[Resource]] = None):
-        self.storage: List[Resource] = resource_list if resource_list is not None else []
+                 resource_list: Optional[Set[Resource]] = None):
+        self.storage: Set[Resource] = set(resource_list) if resource_list is not None else set()
         # if i use set, __hash__ on resource returns id
 
         # should i store a list/set of all ids so that before i lookup
@@ -35,7 +37,7 @@ class ResourceStorage:
     def get_resource(self, 
                      idx: int):
         for resource in self:
-            if resource.id == idx: # i need to make sure all ids are unique!
+            if resource.id == idx:
                 return resource
         raise KeyError(f"Resource with id={idx} not present")
     
@@ -43,10 +45,10 @@ class ResourceStorage:
                      resource: Resource):
         # actually here having a set of ids would be useful because
         # i could quickly check if there is already a resource with the same id
-        self.storage.append(resource)
+        self.storage.add(resource)
+
     
     def delete_resource(self,
                         idx: int):
-        equal_idxs = map(lambda x: x.id == idx, self.storage)
-        idx_to_remove = list(equal_idxs).index(True)
-        self.storage.pop(idx_to_remove)
+        to_delete = self.get_resource(idx)
+        self.storage.remove(to_delete)
