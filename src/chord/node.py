@@ -2,8 +2,8 @@ from typing import Any, Optional, List, NewType
 import numpy as np
 import asyncio
 
-from chord.helpers import is_between, is_between_reverse
-from chord.resources import ResourceStorage
+from helpers import is_between, is_between_reverse
+from resources import ResourceStorage
 
 class Node:
     """
@@ -162,6 +162,8 @@ class Node:
         network.nodes[self.successor].notify(self)
 
     def notify(self, other):
+        # cambia la funzione is between cosi 
+        # gestisce entrambi i casi
         print("notify")
         print("self", self, "other", other)
         print("self.predecessor", self.predecessor)

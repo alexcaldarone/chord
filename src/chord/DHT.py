@@ -1,7 +1,7 @@
 from typing import Any, List, Tuple, Optional, NewType
 import math
 
-from chord.node import Node
+from node import Node
 
 class DistributedHashTable:
     def __init__(self, k: int):
@@ -58,17 +58,19 @@ class DistributedHashTable:
                 return -1
         return -1
     
-    def search(self, resource_id: int, node_id: int = None, k = 0):
-        node_id = self.start if node_id is None else node_id
+    def search(self, resource_id: int, node_id: int, k = 0):
+        #node_id = self.start if node_id is None else node_id
         # logarithmic research
         node = self[node_id]
+        print(node.FT)
         print("res:", resource_id, "node:", node)
+        print("node FT", node.FT)
         if node.is_in(resource_id):
             return node_id
         else:
-            new_node_idx = node.get_closest(resource_id)
-            print("new_node_idx", new_node_idx)
-            new_node = self.nodes[new_node_idx]
+            new_node_idx, new_node = node.get_closest(resource_id)
+            #print("new_node_idx", new_node_idx)
+            #new_node = self.nodes[new_node_idx]
             if node.successor == new_node.id:
                 if new_node.is_in(resource_id):
                     return new_node, k
@@ -162,7 +164,14 @@ if __name__ == "__main__":
     node_1.stabilize(d2)
     print(d2.nodes)
     test_node.notify(node_1)
+    print(node_1.FT)
     print(d2.nodes)
+    print("----------------------------------------------")
+    print(test_node_2.FT)
+    for _ in range(5):
+        test_node_2.fix_fingers()
+    print(test_node_2.FT)
+    #d2.search(resource_id=0, node_id = 2)
     # in questa dht vorrei che 0 avesse come pred e succ 3
     # mentre 3 deve avere come succ e pred 0
     # però non avviene, perche?
