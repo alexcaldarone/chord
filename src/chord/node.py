@@ -107,19 +107,21 @@ class Node:
         # c'e' qualcosa che non va nella ricerca in
         # closest preceding finger.
         n_first = self
+        start = self
         print("id", id)
         print("n_first", n_first)
         # in questo caso la condizione del while non viene soddisfatta mai
         while not is_between(id,
                              n_first.id,
                              n_first.successor["id"],
-                             k = self.k,
+                             k = 2**self.k,
                              include_upper=True,
                              include_lower=False):
             print("inside loop", n_first)
             _, n_first = n_first.__closest_preceding_finger(id)
+            print("INSIDE FIND PREDECESSOR", n_first)
             # per evitare loop infinito
-            if n_first == self: break
+            if n_first == start: break
         return n_first
 
     def __closest_preceding_finger(self, id: int):
@@ -132,8 +134,8 @@ class Node:
             if is_between(self.FT[i]["id"],
                           self.id,
                           id,
-                          k = self.k):
-                return self.FT[i]
+                          k = 2**self.k):
+                return self.FT[i]["id"], self.FT[i]["node"]
         # in questa funzione potrei avere due output diversi (un intero o un Node)
         # quello che potrei fare è restituire anche qui sotto un id ma distringuere
         # i due return con un flag (True, False) che gestico sopra
@@ -165,7 +167,7 @@ class Node:
         if (self.predecessor["id"] is None) or is_between(other.id,
                                                     self.predecessor["id"],
                                                     self.id,
-                                                    k = self.k):
+                                                    k = 2**self.k):
                 print("inside if", self, self.predecessor)
                 self.predecessor = {"id": other.id, "node": other}
         print("notify -- second if\t self.id:", self.id, "other.id:", other.id,
@@ -173,9 +175,15 @@ class Node:
         if is_between(self.id,
                       other.id,
                       self.successor["id"],
-                      k = self.k):
+                      k = 2**self.k):
             other.successor = {"id": self.id, "node": self}
-
+        
+        # edge case: ho due nodi, uno vede l'altro come succ e pred mentre
+        # l'altro lo vede solo come pred
+        if (other.successor["id"] == self.id) and (self.predecessor["id"] == other.id) and \
+            (other.predecessor["id"] == self.id) and (self.successor["id"] != other.id):
+            self.successor = {"id": other.id, "node": other}
+    
     def fix_fingers(self):
         # periodically refresh finger table entries
         i = np.random.randint(low = 0, high = self.k)
