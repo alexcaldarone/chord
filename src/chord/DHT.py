@@ -1,7 +1,8 @@
-from typing import Any, List, Tuple, Optional, NewType
+from typing import Any, List, Tuple, Optional, NewType, Union
 import math
 
-from node import Node
+from chord.node import Node
+from chord.resources import Resource
 
 class DistributedHashTable:
     def __init__(self, k: int):
@@ -17,6 +18,7 @@ class DistributedHashTable:
     # looking for next node: iterate on sublist following the newly added node and stop at the first node
     # looking for previous node: iterate (backwards) on sublist that comes before newly added node and stop at the first node
 
+    # se io non aggiungo i nodi linearmente è inutile
     def __iter__(self):
         if self.is_empty:
             raise Exception("Cannot iterate over empty table.")
@@ -49,6 +51,9 @@ class DistributedHashTable:
             # make sure that also the first node has a predecessor set to the
             # last node of the ring
             node.successor = self.succ(node.id) # move this method to the node class?
+    
+    def add_resource(self, resource: Union[Resource, Tuple[int, Any]]):
+        pass
 
     def linear_search_resource(self, resource_id: int):
         for node in self:
@@ -144,7 +149,7 @@ if __name__ == "__main__":
     print("test_node successor:", test_node.successor)
     print(d2.nodes)
     print("--- adding resource to test_node ---")
-    node_1.add_resource(0)
+    node_1.add_resource((0, None))
     print("risorse di test_node:", test_node.resources)
     print("predecessor of node_1:", node_1.predecessor)
     print("-- test_node calls stabilization ---")

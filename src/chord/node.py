@@ -1,9 +1,9 @@
-from typing import Any, Optional, List, NewType, Dict
+from typing import Any, Optional, List, NewType, Dict, Union, Tuple
 import numpy as np
 import asyncio
 
-from helpers import is_between, is_between_reverse
-from resources import ResourceStorage
+from chord.helpers import is_between, is_between_reverse
+from chord.resources import ResourceStorage, Resource
 
 class Node:
     """
@@ -17,7 +17,7 @@ class Node:
         self.k: int = k
         self.FT: list[int] = [{"id": None, "node": self}] + [{"id": -1, "node": self} for _ in range(1, self.k)] # nella ft ci vanno i nodi non gli id
         self.successor_list: list[int] = [{"id": self.id, "node": self} for _ in range(self.k)] # direct successor list
-        self.resources: list[Any] = []
+        self.resources: ResourceStorage = ResourceStorage()
         self.predecessor: int = {"id": None, "node": None}
 
         self.__DIRECT_SUCC = self.k
@@ -34,22 +34,24 @@ class Node:
         self.FT[0] = value
     
     def is_in(self, resource_id: int) -> bool:
-        for el in self.resources:
-            if el == resource_id:
-                return True
-        return False
+        try:
+            res = self.resources.get_resource(resource_id)
+            return True
+        except KeyError:
+            return False
     
-    def add_resource(self, value: Any):
-        self.resources.append(value)
+    def add_resource(self, value: Union[Resource, Tuple[int, Any]]):
+        value = value if isinstance(value, Resource) else Resource(value[0], value[1])
+        self.resources.add_resource(value)
     
     def get_closest(self, resource_id: int) -> Dict:
         # find the closest inedx in the finger table to the resource index
         # cambia questo?
         for idx in range(self.k-1, -1, -1):
             if self.FT[idx]["id"] < resource_id:
-                return self.FT[idx]
+                return self.FT[idx]["id"], self.FT[idx]["node"]
 
-        return self.FT[0]
+        return self.FT[0]["id"], self.FT[0]["node"]
     
     def __init_empty_ft(self):
         # if node has a successor inherit its finger table,
@@ -80,23 +82,19 @@ class Node:
             self.predecessor = {"id": None, "node": None}
             self.__init_empty_ft()
         else:
+            if self.id == other.id:
+                raise RuntimeError("Cannot have two nodes with same id in network")
+            
             self.predecessor = {"id": None, "node": None}
             self.successor = other.__find_successor(self.id)
             # as suggested by the paper, we inherit the FT 
             # from the neighbouring node
             self.__init_empty_ft()
-        
-    def find_successor(self, id:int):
-        pass
 
     def __find_successor(self, id: int) -> Dict:
         # ask node to find id's successor
         print("find_successor", self)
         print(self.predecessor)
-        if self.predecessor["id"] is None and self.predecessor["node"] is None:
-            # if predecessor and successor are the same there's only
-            # one node in the dht
-            return self.successor
         
         n_first = self.__find_predecessor(id)
         return n_first.successor
@@ -107,7 +105,6 @@ class Node:
         # c'e' qualcosa che non va nella ricerca in
         # closest preceding finger.
         n_first = self
-        start = self
         print("id", id)
         print("n_first", n_first)
         # in questo caso la condizione del while non viene soddisfatta mai
@@ -118,10 +115,11 @@ class Node:
                              include_upper=True,
                              include_lower=False):
             print("inside loop", n_first)
+            old_n_first = n_first
             _, n_first = n_first.__closest_preceding_finger(id)
             print("INSIDE FIND PREDECESSOR", n_first)
             # per evitare loop infinito
-            if n_first == start: break
+            if n_first == old_n_first: break
         return n_first
 
     def __closest_preceding_finger(self, id: int):
@@ -140,14 +138,14 @@ class Node:
         # quello che potrei fare è restituire anche qui sotto un id ma distringuere
         # i due return con un flag (True, False) che gestico sopra
         return (self.id, self)
-    
 
     def stabilize(self, network):
         # periodically verify the node's immediate successor
         # and tell the other successor about it
         print("stabilize", self)
         print(self.predecessor)
-        x_id, x_node = network.nodes[self.successor["id"]].predecessor.values() # prendo il predecessore del successore sull'anello
+        predessor_dict = network.nodes[self.successor["id"]].predecessor
+        x_id, x_node = predessor_dict["id"], predessor_dict["node"] # prendo il predecessore del successore sull'anello
         print("x id and node", x_id, x_node)
         print("self.id", self.id)
         print("self.successor", self.successor)
