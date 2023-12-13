@@ -69,11 +69,11 @@ class DistributedHashTable:
             return node_id
         else:
             new_node_idx, new_node = node.get_closest(resource_id)
-            #print("new_node_idx", new_node_idx)
-            #new_node = self.nodes[new_node_idx]
-            if node.successor == new_node.id:
+            print("new_node_idx", new_node_idx)
+            print(new_node)
+            if node.successor["id"] == new_node.id:
                 if new_node.is_in(resource_id):
-                    return new_node, k
+                    return new_node, k+1
                 else:
                     raise LookupError("Resource not found in DHT")
             else:
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     print("test_node successor:", test_node.successor)
     print(d2.nodes)
     print("--- adding resource to test_node ---")
-    test_node.add_resource(0)
+    node_1.add_resource(0)
     print("risorse di test_node:", test_node.resources)
     print("predecessor of node_1:", node_1.predecessor)
     print("-- test_node calls stabilization ---")
@@ -159,7 +159,8 @@ if __name__ == "__main__":
     print(node_1.FT)
     for _ in range(10): test_node.fix_fingers()
     print(test_node.FT)
-    """test_node_2 = Node(id = 2, k = 3)
+    print("--- test_node_2 joins the network ---")
+    test_node_2 = Node(id = 2, k = 3)
     test_node_2.join(d2, node_1)
     print(d2.nodes)
     test_node_2.stabilize(network=d2)
@@ -177,12 +178,12 @@ if __name__ == "__main__":
     test_node.notify(node_1)
     print(node_1.FT)
     print(d2.nodes)
-    print("----------------------------------------------")
+    print("---- test_node_2 fix_fingers----")
     print(test_node_2.FT)
-    for _ in range(5):
-        test_node_2.fix_fingers()
-    print(test_node_2.FT)"""
-    #d2.search(resource_id=0, node_id = 2)
+    for _ in range(10): test_node_2.fix_fingers()
+    print(test_node_2.FT)
+    print(d2.search(resource_id=0, node_id = 2))
+    #print(f"La risorsa 0 si trova su {res}, che è stato raggiunto in {jumps} salti")
     # in questa dht vorrei che 0 avesse come pred e succ 3
     # mentre 3 deve avere come succ e pred 0
     # però non avviene, perche?
