@@ -87,9 +87,9 @@ class Node:
 
         # here other = None indicates we are adding the first node of
         # the network
-        print("self inside join:", self)
+        #print("self inside join:", self)
         network.nodes[self.id] = self
-        print("inside join", network.nodes)
+        #print("inside join", network.nodes)
         if other == None:
             self.predecessor = {"id": None, "node": None}
             self.__init_empty_ft()
@@ -105,8 +105,8 @@ class Node:
 
     def __find_successor(self, id: int) -> Dict:
         # ask node to find id's successor
-        print("find_successor", self)
-        print(self.predecessor)
+        #print("find_successor", self)
+        #print(self.predecessor)
         
         n_first = self.__find_predecessor(id)
         return n_first.successor
@@ -117,8 +117,8 @@ class Node:
         # c'e' qualcosa che non va nella ricerca in
         # closest preceding finger.
         n_first = self
-        print("id", id)
-        print("n_first", n_first)
+        #print("id", id)
+        #print("n_first", n_first)
         # in questo caso la condizione del while non viene soddisfatta mai
         while not is_between(id,
                              n_first.id,
@@ -126,21 +126,21 @@ class Node:
                              k = 2**self.k,
                              include_upper=True,
                              include_lower=False):
-            print("inside loop", n_first)
+            #print("inside loop", n_first)
             old_n_first = n_first
             _, n_first = n_first.__closest_preceding_finger(id)
-            print("INSIDE FIND PREDECESSOR", n_first)
+            #print("INSIDE FIND PREDECESSOR", n_first)
             # per evitare loop infinito
             if n_first == old_n_first: break
         return n_first
 
     def __closest_preceding_finger(self, id: int):
         # return closest finger preceding id
-        print("closest_preceding_finger")
-        print("id di cui trovare il finger", id)
-        print("id del nodo che chiama la funzione", self.id)
+        #print("closest_preceding_finger")
+        #print("id di cui trovare il finger", id)
+        #print("id del nodo che chiama la funzione", self.id)
         for i in range(self.k-1, -1, -1):
-            print("FT[i]:", self.FT[i])
+            #print("FT[i]:", self.FT[i])
             if is_between(self.FT[i]["id"],
                           self.id,
                           id,
@@ -154,14 +154,14 @@ class Node:
     def stabilize(self, network):
         # periodically verify the node's immediate successor
         # and tell the other successor about it
-        print("stabilize", self)
-        print(self.predecessor)
+        #print("stabilize", self)
+        #print(self.predecessor)
         predessor_dict = network.nodes[self.successor["id"]].predecessor
         x_id, x_node = predessor_dict["id"], predessor_dict["node"] # prendo il predecessore del successore sull'anello
-        print("x id and node", x_id, x_node)
-        print("self.id", self.id)
-        print("self.successor", self.successor)
-        print(f"{x_id is not None and x_node is not None}")
+        #print("x id and node", x_id, x_node)
+        #print("self.id", self.id)
+        #print("self.successor", self.successor)
+        #print(f"{x_id is not None and x_node is not None}")
         if (x_id is not None and x_node is not None):
             if is_between(x_id, self.id, self.successor["id"], k = self.k):
                 self.successor = {"id": x_id, "node": x_node}
@@ -171,17 +171,17 @@ class Node:
     def notify(self, other):
         # cambia la funzione is between cosi 
         # gestisce entrambi i casi
-        print("notify")
-        print("self", self, "other", other)
-        print("self.predecessor", self.predecessor)
+        #print("notify")
+        #print("self", self, "other", other)
+        #print("self.predecessor", self.predecessor)
         if (self.predecessor["id"] is None) or is_between(other.id,
                                                     self.predecessor["id"],
                                                     self.id,
                                                     k = 2**self.k):
-                print("inside if", self, self.predecessor)
+                #print("inside if", self, self.predecessor)
                 self.predecessor = {"id": other.id, "node": other}
-        print("notify -- second if\t self.id:", self.id, "other.id:", other.id,
-              "self.successor.id:", self.successor['id'])
+        #print("notify -- second if\t self.id:", self.id, "other.id:", other.id,
+        #      "self.successor.id:", self.successor['id'])
         if (self.successor["id"] is not None) and is_between(self.id,
                                                              other.id,
                                                              self.successor["id"],
@@ -197,6 +197,6 @@ class Node:
     def fix_fingers(self):
         # periodically refresh finger table entries
         i = np.random.randint(low = 0, high = self.k)
-        print("i", i)
-        print("starting id:", (self.id + 2**i) % 2**self.k)
+        #print("i", i)
+        #print("starting id:", (self.id + 2**i) % 2**self.k)
         self.FT[i] = self.__find_successor((self.id + 2**i) % 2**self.k)

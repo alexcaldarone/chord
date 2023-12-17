@@ -67,15 +67,15 @@ class DistributedHashTable:
         #node_id = self.start if node_id is None else node_id
         # logarithmic research
         node = self[node_id]
-        print(node.FT)
-        print("res:", resource_id, "node:", node)
-        print("node FT", node.FT)
+        #print(node.FT)
+        #print("res:", resource_id, "node:", node)
+        #print("node FT", node.FT)
         if node.is_in(resource_id):
             return node, k
         else:
             new_node_idx, new_node, succ = node.get_closest(resource_id)
-            print("new_node_idx", new_node_idx)
-            print(new_node)
+            #print("new_node_idx", new_node_idx)
+            #print(new_node)
             if succ:
                 if new_node.is_in(resource_id):
                     return new_node, k+1
