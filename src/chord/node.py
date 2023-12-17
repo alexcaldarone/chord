@@ -36,22 +36,34 @@ class Node:
     def is_in(self, resource_id: int) -> bool:
         try:
             res = self.resources.get_resource(resource_id)
-            return True
         except KeyError:
             return False
+        else:
+            return True
     
     def add_resource(self, value: Union[Resource, Tuple[int, Any]]):
         value = value if isinstance(value, Resource) else Resource(value[0], value[1])
-        self.resources.add_resource(value)
+        # aggiungi verifica per vedere se id risorsa è tra quello di questo nodo
+        # e quello del successore
+        if self.predecessor["id"] is None or \
+            is_between(value.id, self.predecessor["id"], self.id, include_lower= True,
+                       k = 2**self.k):
+            self.resources.add_resource(value)
+        else:
+            raise Exception("Cannot resource with this id on this node")
     
     def get_closest(self, resource_id: int) -> Dict:
         # find the closest inedx in the finger table to the resource index
         # cambia questo?
         for idx in range(self.k-1, -1, -1):
-            if self.FT[idx]["id"] < resource_id:
-                return self.FT[idx]["id"], self.FT[idx]["node"]
+            if is_between(resource_id,
+                          self.FT[idx]["id"],
+                          self.id,
+                          k = 2**self.k,
+                          include_lower=True):
+                return self.FT[idx]["id"], self.FT[idx]["node"], False
 
-        return self.FT[0]["id"], self.FT[0]["node"]
+        return self.FT[0]["id"], self.FT[0]["node"], True
     
     def __init_empty_ft(self):
         # if node has a successor inherit its finger table,
@@ -170,10 +182,10 @@ class Node:
                 self.predecessor = {"id": other.id, "node": other}
         print("notify -- second if\t self.id:", self.id, "other.id:", other.id,
               "self.successor.id:", self.successor['id'])
-        if is_between(self.id,
-                      other.id,
-                      self.successor["id"],
-                      k = 2**self.k):
+        if (self.successor["id"] is not None) and is_between(self.id,
+                                                             other.id,
+                                                             self.successor["id"],
+                                                             k = 2**self.k):
             other.successor = {"id": self.id, "node": self}
         
         # edge case: ho due nodi, uno vede l'altro come succ e pred mentre
