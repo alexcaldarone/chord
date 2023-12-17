@@ -28,7 +28,7 @@ if __name__ == "__main__":
             #random_indices = rng.choice(2**k_net, size=n_nodes, replace=False)
             #random_indices = [np.random.randint(0, 2**k) for _ in range(n_nodes)]
             random_indices = [n for n in range(0, n_nodes)]
-            print("RANDOM INDICES:", random_indices)
+            #print("RANDOM INDICES:", random_indices)
 
             print("-- adding nodes")
             node_list = [Node(el, k_net) for el in random_indices]
