@@ -1,64 +1,90 @@
 import matplotlib.pyplot as plt
 import sys
 import numpy as np
+import pandas as pd
 
 from chord.DHT import DistributedHashTable
 from chord.node import Node
+from chord.resources import Resource
 
 if __name__ == "__main__":
-    k = 3
-    n_nodes = 4
-    resources_per_node = 1
+    ks = [3, 4, 5, 6, 7, 8, 9, 10 , 11]
+    LIST_TO_ADD_TO_DF = []
+    for k_net in ks:
+        print(f"----- K = {k_net} -----")
+        n_nodes = 2**k_net
+        resources_per_node = 1
 
-    assert n_nodes * resources_per_node <= 2**k
+        assert n_nodes * resources_per_node <= 2**k_net
 
-    network = DistributedHashTable(k)
+        MAX_NET = 10
+        n_network = 0
+        tries = 0
+        while n_network < MAX_NET:
+            tries += 1
+            print(f"- Network {n_network}")
+            network = DistributedHashTable(k_net)
+            rng = np.random.default_rng()
+            #random_indices = rng.choice(2**k_net, size=n_nodes, replace=False)
+            #random_indices = [np.random.randint(0, 2**k) for _ in range(n_nodes)]
+            random_indices = [n for n in range(0, n_nodes)]
+            print("RANDOM INDICES:", random_indices)
 
-    random_indices = [np.random.randint(0, 2**k) for _ in range(n_nodes)]
-    print("RANDOM INDICES:", random_indices)
+            print("-- adding nodes")
+            node_list = [Node(el, k_net) for el in random_indices]
+            node_list[-1].join(network)
+            for i in range(len(node_list)-2, -1, -1):
+                node_list[i].join(network, node_list[i+1])
+                node_list[i].notify(node_list[i].successor["node"])
+                node_list[i].notify(node_list[i].predecessor["node"])
+                node_list[i].notify(node_list[-1])
+                node_list[-1].notify(node_list[i])
+                node_list[i].stabilize(network)
+            
+            print("-- stabilizing network")
+            for _ in range(n_nodes * 10):
+                k = np.random.choice(node_list, 1)[0]
+                k.stabilize(network)
+                k.notify(k.successor["node"])
+                k.notify(k.predecessor["node"])
+                k.stabilize(network)
+                for _ in range(10): k.fix_fingers()
 
-    node_list = [Node(el, k) for el in random_indices]
-    node_list[0].join(network)
-    for i in range(1, len(node_list)):
-        node_list[i].join(network, node_list[i-1])
-        node_list[i].stabilize(network)
-        node_list[i-1].notify(node_list[i])
-        node_list[i].notify(node_list[i-1])
-    
-    for _ in range(10):
-        for i in range(len(node_list)):
-            node_list[i].stabilize(network)
-            node_list[i].notify(node_list[i-1])
-            node_list[i-1].notify(node_list[i])
-    
-    for node in node_list:
-        for _ in range(15): node.fix_fingers()
-    
-    print(network.nodes)
-    print("---------------------")
-    # aggiunta risorse
-    res_id = [(node.id - 1) % 2**node.k for node in node_list]
-    print("res_id:", res_id)
-    print("node_list:", node_list)
-    for i in range(len(node_list)):
-        node_list[i].add_resource((res_id[i], None))
-    
-    random_res = int(np.random.choice(res_id, 1))
-    random_node = np.random.choice(node_list, 1)[0]
-    network.search(random_res, random_node.id)
+            print("-- verification of network correctness")
+            good = True
+            for node in node_list:
+                if node.id != node.successor["node"].predecessor["id"]:
+                    good = False
+                    print(f"bad connection: {node}, {node.successor['node']}")
+                    break
+            if not good:
+                continue
+            else:
+                print("--- network formed correctly")
+                #print(network.nodes)
+                print("-- adding resources")
+                # aggiunta risorse
+                resources = [Resource((node.id - 1) % 2**k_net, None)
+                            for node in node_list]
+                for node in node_list:
+                    node.add_resource(Resource((node.id - 1) % 2**k_net, None))
 
-    """
-    # aggiungo risorse (per ora una pari a id-1)
-    resources = [node.id-1 for node in network]
-    print("resources:", resources)
-    for res in resources:
-        network[res+1].add_resource(res)
-        print(network[res+1])
+                #for node in node_list:
+                #    print(node, node.resources.storage)
+                
+                print("-- running searches")
+                jump_list = []
+                for search_n in range(100):
+                    rand_node = np.random.choice(node_list, size = 1)[0]
+                    rand_res = np.random.choice(resources, size = 1)[0]
+                    #print("rand_resource:", rand_res)
+                    #print("beginning node:", rand_node)
+                    res_node, jumps = network.search(rand_res.id, rand_node.id)
+                    jump_list.append(
+                        (k_net, n_network, search_n, jumps)
+                    )
+                LIST_TO_ADD_TO_DF.append(jump_list)
+                n_network += 1
     
-    # scelgo un nodo a caso e faccio partire una ricerca
-    for _ in range(100):
-        idx_choice = np.random.choice(random_indices, 1)
-        print("idx_choice", int(idx_choice))
-        res_choice = np.random.choice(resources, 1)
-        print("resource choice", int(res_choice))
-        network.search(res_choice, int(idx_choice))"""
+    df = pd.DataFrame.from_records(zip(LIST_TO_ADD_TO_DF))
+    df.to_csv("C:/Users/alexc/Desktop/Universita/3_anno/sistemi_di_elaborazione_2/laboratori/dht/data/stable_networks_full.csv")
