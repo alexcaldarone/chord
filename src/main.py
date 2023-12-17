@@ -12,7 +12,7 @@ if __name__ == "__main__":
     LIST_TO_ADD_TO_DF = []
     for k_net in ks:
         print(f"----- K = {k_net} -----")
-        n_nodes = 2**k_net
+        n_nodes = 2**k_net // 2
         resources_per_node = 1
 
         assert n_nodes * resources_per_node <= 2**k_net
@@ -25,9 +25,10 @@ if __name__ == "__main__":
             print(f"- Network {n_network}")
             network = DistributedHashTable(k_net)
             rng = np.random.default_rng()
-            #random_indices = rng.choice(2**k_net, size=n_nodes, replace=False)
+            random_indices = rng.choice(2**k_net, size=n_nodes, replace=False)
+            random_indices = sorted(random_indices)
             #random_indices = [np.random.randint(0, 2**k) for _ in range(n_nodes)]
-            random_indices = [n for n in range(0, n_nodes)]
+            #random_indices = [n for n in range(0, n_nodes)]
             #print("RANDOM INDICES:", random_indices)
 
             print("-- adding nodes")
@@ -87,4 +88,4 @@ if __name__ == "__main__":
                 n_network += 1
     
     df = pd.DataFrame.from_records(zip(LIST_TO_ADD_TO_DF))
-    df.to_csv("C:/Users/alexc/Desktop/Universita/3_anno/sistemi_di_elaborazione_2/laboratori/dht/data/stable_networks_full.csv")
+    df.to_csv("C:/Users/alexc/Desktop/Universita/3_anno/sistemi_di_elaborazione_2/laboratori/dht/data/stable_networks_half_full.csv")
