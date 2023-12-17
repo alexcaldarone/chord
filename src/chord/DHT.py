@@ -71,12 +71,12 @@ class DistributedHashTable:
         print("res:", resource_id, "node:", node)
         print("node FT", node.FT)
         if node.is_in(resource_id):
-            return node_id
+            return node, k
         else:
-            new_node_idx, new_node = node.get_closest(resource_id)
+            new_node_idx, new_node, succ = node.get_closest(resource_id)
             print("new_node_idx", new_node_idx)
             print(new_node)
-            if node.successor["id"] == new_node.id:
+            if succ:
                 if new_node.is_in(resource_id):
                     return new_node, k+1
                 else:
