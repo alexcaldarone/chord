@@ -44,8 +44,7 @@ class Node:
     
     def add_resource(self, value: Union[Resource, Tuple[int, Any]]):
         value = value if isinstance(value, Resource) else Resource(value[0], value[1])
-        # aggiungi verifica per vedere se id risorsa è tra quello di questo nodo
-        # e quello del successore
+
         if self.predecessor["id"] is None or \
             is_between(value.id, self.predecessor["id"], self.id, include_lower= True,
                        k = 2**self.k):
@@ -103,6 +102,7 @@ class Node:
             # as suggested by the paper, we inherit the FT 
             # from the neighbouring node
             self.__init_empty_ft()
+            # aggiungi funzione per controllare se si devono spostare risorse
 
     def __find_successor(self, id: int) -> Dict:
         # ask node to find id's successor
@@ -195,6 +195,28 @@ class Node:
             (other.predecessor["id"] == self.id) and (self.successor["id"] != other.id):
             self.successor = {"id": other.id, "node": other}
     
+    def exit(self, network):
+        # se nodo esce dalla rete deve:
+        # 1. controllare che sia il successore del suo predecessore e impostare
+        # il successore del suo predecessore come il successore del nodo che esce
+        # sono l'unico nodo presente
+        if self.successor["id"] is None:
+            network.nodes[self.id] = None
+        
+        if self.predecessor["node"].successor["node"] == self and \
+            self.predecessor["id"] is not None:
+            self.predecessor.successor = self.successor
+        if self.successor["node"].predecessor["node"] == self and \
+            self.predecessor["id"] is not None:
+            self.successor.predecessor = self.predecessor
+        
+        self.move_resources(self.successor["node"], exit = True)
+        network.nodes[self.id] = None
+        # 2. controllare che sia il predecessore del nodo successore e, in tal caso, impostare
+        # il predecessore del successore come il predecessore del nodo che esce
+        # 3. spostare tutte le sue risorse al suo successore
+        
+    
     def fix_fingers(self):
         # periodically refresh finger table entries
         i = np.random.randint(low = 0, high = self.k)
@@ -203,8 +225,25 @@ class Node:
         self.FT[i] = self.__find_successor((self.id + 2**i) % 2**self.k)
     
     def fix_successor_list(self):
-        i = np.random.randint(low = 0, high = self.k)
+        i = np.random.randint(low = 0, high = self.__DIRECT_SUCC)
         x = self.successor
         for _ in range(i):
             x = x.successor
         self.successor_list[i] = x
+    
+    def move_resources(self, other, exit: bool):
+        if exit:
+            # we are leaving the network, move our resources to our successor
+            # assumes we have already fixed successor and predecessor pointers
+            for res in self.resources: other.add_resource(res)
+        else:
+            # we are joining the network
+            # ask other to give us the resources we are now in charge of
+            for res in other.resources:
+                try:
+                    # controlla se risorsa mi spetta, se si la aggiunge
+                    self.add_resource(res) # will raise exception if we are not in charge of resource
+                    other.delete_resource(res) # la elimino da other
+                except:
+                    # se risorsa non mi spetta, la lascio in other e passo alla prossima
+                    continue
