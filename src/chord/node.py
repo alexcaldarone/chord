@@ -15,13 +15,13 @@ class Node:
         assert id <= 2**k - 1
         self.id: int = int(id)
         self.k: int = k
+        self.__DIRECT_SUCC = self.k
+
         self.FT: list[int] = [{"id": None, "node": self}] + [{"id": -1, "node": self} for _ in range(1, self.k)] # nella ft ci vanno i nodi non gli id
-        self.successor_list: list[int] = [{"id": self.id, "node": self} for _ in range(self.k)] # direct successor list
+        self.successor_list: list[int] = [{"id": self.id, "node": self} for _ in range(self.__DIRECT_SUCC)] # direct successor list
         self.resources: ResourceStorage = ResourceStorage()
         self.predecessor: int = {"id": None, "node": None}
 
-        self.__DIRECT_SUCC = self.k
-    
     def __repr__(self) -> str:
         return f"Node(id={self.id}, next = {self.successor['id']}, pred={self.predecessor['id']})"
     
