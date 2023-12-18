@@ -49,6 +49,6 @@ class ResourceStorage:
 
     
     def delete_resource(self,
-                        idx: int):
-        to_delete = self.get_resource(idx)
+                        resource: Resource):
+        to_delete = self.get_resource(resource.id)
         self.storage.remove(to_delete)
