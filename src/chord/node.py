@@ -32,6 +32,7 @@ class Node:
     @successor.setter
     def successor(self, value: Dict):
         self.FT[0] = value
+        self.successor_list[0] = value
     
     def is_in(self, resource_id: int) -> bool:
         try:
@@ -200,3 +201,10 @@ class Node:
         #print("i", i)
         #print("starting id:", (self.id + 2**i) % 2**self.k)
         self.FT[i] = self.__find_successor((self.id + 2**i) % 2**self.k)
+    
+    def fix_successor_list(self):
+        i = np.random.randint(low = 0, high = self.k)
+        x = self.successor
+        for _ in range(i):
+            x = x.successor
+        self.successor_list[i] = x
