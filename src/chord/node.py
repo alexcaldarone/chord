@@ -2,7 +2,7 @@ from typing import Any, Optional, List, NewType, Dict, Union, Tuple
 import numpy as np
 import asyncio
 
-from chord.helpers import is_between, is_between_reverse
+from chord.helpers import is_between
 from chord.resources import ResourceStorage, Resource
 
 class Node:
@@ -212,11 +212,7 @@ class Node:
         
         self.move_resources(self.successor["node"], exit = True)
         network.nodes[self.id] = None
-        # 2. controllare che sia il predecessore del nodo successore e, in tal caso, impostare
-        # il predecessore del successore come il predecessore del nodo che esce
-        # 3. spostare tutte le sue risorse al suo successore
-        
-    
+
     def fix_fingers(self):
         # periodically refresh finger table entries
         i = np.random.randint(low = 0, high = self.k)

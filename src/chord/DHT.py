@@ -3,6 +3,7 @@ import math
 
 from chord.node import Node
 from chord.resources import Resource
+from chord.helpers import is_between
 
 class DistributedHashTable:
     def __init__(self, k: int):
@@ -55,13 +56,19 @@ class DistributedHashTable:
     def add_resource(self, resource: Union[Resource, Tuple[int, Any]]):
         pass
 
-    def linear_search_resource(self, resource_id: int):
-        for node in self:
-            if node.id >= resource_id:
-                if node.is_in(resource_id):
-                    return node.id
-                return -1
-        return -1
+    def linear_search_resource(self, node_id: int, resource_id: int, k = 0):
+        node = self[node_id]
+
+        if node.predecessor["id"] is not None:
+            # there's more than one node in the network
+            while not is_between(resource_id, node.predecessor["id"], node.id,
+                                include_lower=True):
+                node = node.successor["node"]
+        
+        if node.is_in(resource_id):
+                return node, k
+        else:
+            raise LookupError("Resource not found in DHT")
     
     def search(self, resource_id: int, node_id: int, k = 0):
         #node_id = self.start if node_id is None else node_id
