@@ -29,6 +29,7 @@ class ProtocolSimulator:
     async def notification(self):
         random_node_notification_id = np.random.choice(self._used_node_ids,
                                                     size = 1)
+        # potrei indicizzare direttamente su nodes
         node = self.network.nodes[random_node_notification_id]
         pred = self.network.nodes[random_node_notification_id].predecessor["node"]
         succ = self.network.nodes[random_node_notification_id].successor["node"]
@@ -38,8 +39,8 @@ class ProtocolSimulator:
         node.notify(succ)
         succ.notify(pred)
 
-    async def manage_node_fail(self):
-        pass # do I need it here or on dht/node ?
+    async def manage_node_fail(self, failed_node_id):
+        self.network[failed_node_id].exit()
 
     async def search(self, node_id, resource_id):
         start_node_id = node_id
