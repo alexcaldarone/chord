@@ -41,14 +41,29 @@ class ProtocolSimulator:
     async def manage_node_fail(self):
         pass # do I need it here or on dht/node ?
 
-    async def search(self, resource_id):
-        pass # gestisci search logaritmica e lineare
+    async def search(self, node_id, resource_id):
+        start_node_id = node_id
+        for _ in range(3):
+            try:
+                res_node, jumps = self.network.search(resource_id, start_node_id)
+                return res_node, jumps
+            except LookupError:
+                # if search fails we start it from another randomly chosen node
+                start_node_id = np.random.choice(self._used_node_ids, size = 1)
+                continue
+        # if not found try linear search
+        res_node_lin, jumps_lin = self.network.linear_search_resource(node_id, resource_id)
+        return res_node_lin, jumps_lin
 
     async def fix_fingers(self):
-        pass
+        random_node_fix_id = np.random.choice(self._used_node_ids,
+                                              size = 1)
+        self.network[random_node_fix_id].fix_fingers()
 
     async def fix_successor_list(self):
-        pass
+        random_node_fix_id = np.random.choice(self._used_node_ids,
+                                              size = 1)
+        self.network[random_node_fix_id].fix_successor_list()
 
     def simulate(self,
                  n_epochs,
