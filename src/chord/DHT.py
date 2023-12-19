@@ -64,6 +64,7 @@ class DistributedHashTable:
             while not is_between(resource_id, node.predecessor["id"], node.id,
                                 include_lower=True):
                 node = node.successor["node"]
+                k += 1
         
         if node.is_in(resource_id):
                 return node, k
