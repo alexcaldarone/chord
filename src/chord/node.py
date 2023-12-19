@@ -88,7 +88,11 @@ class Node:
         # here other = None indicates we are adding the first node of
         # the network
         #print("self inside join:", self)
+        if network.counter == 2**self.k:
+            raise Exception("Cannot add node to a full DHT")
+        
         network.nodes[self.id] = self
+        network.counter += 1
         #print("inside join", network.nodes)
         if other == None:
             self.predecessor = {"id": None, "node": None}
