@@ -1,3 +1,61 @@
+import asyncio
+import numpy as np
 
-class Protocol:
-    pass
+from DHT import DistributedHashTable
+
+class ProtocolSimulator:
+    
+    def __init__(self, k: int):
+        self.k = k
+        self.network = DistributedHashTable(k)
+        self._used_node_ids = set()
+
+    async def node_join(self, node1, node2):
+        # generate a random node
+        if not node2:
+            node1.join(self.network)
+        else:
+            node1.join(self.network, node2)
+        
+        self.__used_node_ids.add(node1.id)
+        # do i run stabilize and notify here?
+        
+
+    async def stabilize_network(self):
+        random_node_to_stabilize_id = np.random.choice(self._used_node_ids,
+                                                    size = 1)
+        self.network.nodes[random_node_to_stabilize_id].stabilize()
+
+    async def notification(self):
+        random_node_notification_id = np.random.choice(self._used_node_ids,
+                                                    size = 1)
+        node = self.network.nodes[random_node_notification_id]
+        pred = self.network.nodes[random_node_notification_id].predecessor["node"]
+        succ = self.network.nodes[random_node_notification_id].successor["node"]
+        # 4 notifications useless?
+        node.notify(pred)
+        pred.notify(node)
+        node.notify(succ)
+        succ.notify(pred)
+
+    async def manage_node_fail(self):
+        pass # do I need it here or on dht/node ?
+
+    async def search(self, resource_id):
+        pass # gestisci search logaritmica e lineare
+
+    async def fix_fingers(self):
+        pass
+
+    async def fix_successor_list(self):
+        pass
+
+    def simulate(self,
+                 n_epochs,
+                 node_join_probability,
+                 node_failure_probability):
+        # misurare epoche in numero di operazioni fatte? secondi?
+        # se misuro in secondi sarò più lento
+        pass
+
+# resource movement qui o su classe nodo?
