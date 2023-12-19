@@ -1,9 +1,9 @@
 from typing import Any, List, Tuple, Optional, NewType, Union
 import math
 
-from chord.node import Node
-from chord.resources import Resource
-from chord.helpers import is_between
+from node import Node
+from resources import Resource
+from helpers import is_between
 
 class DistributedHashTable:
     def __init__(self, k: int):
