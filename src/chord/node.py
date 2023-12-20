@@ -1,6 +1,5 @@
 from typing import Any, Optional, List, NewType, Dict, Union, Tuple
 import numpy as np
-import asyncio
 
 from helpers import is_between
 from resources import ResourceStorage, Resource
@@ -80,7 +79,7 @@ class Node:
         self.successor_list = [{"id":id, "node":node} for _ in range(self.__DIRECT_SUCC)]
     
     # how do i manage adding node to empty dht?
-    async def join(self, network, other = None):
+    def join(self, network, other = None):
         # posso anche non passare l'altro nodo
         # function that sets this node as the predecessor of node other
         # on the dht network
@@ -156,7 +155,7 @@ class Node:
         # i due return con un flag (True, False) che gestico sopra
         return (self.id, self)
 
-    async def stabilize(self, network):
+    def stabilize(self, network):
         # periodically verify the node's immediate successor
         # and tell the other successor about it
         #print("stabilize", self)
@@ -171,18 +170,17 @@ class Node:
             if is_between(x_id, self.id, self.successor["id"], k = self.k):
                 self.successor = {"id": x_id, "node": x_node}
 
-        await network.nodes[self.successor["id"]].notify(self)
+        network.nodes[self.successor["id"]].notify(self)
 
-    async def notify(self, other):
+    def notify(self, other):
         # cambia la funzione is between cosi 
         # gestisce entrambi i casi
         #print("notify")
         #print("self", self, "other", other)
         #print("self.predecessor", self.predecessor)
-        if (self.predecessor["id"] is None) or is_between(other.id,
-                                                    self.predecessor["id"],
-                                                    self.id,
-                                                    k = 2**self.k):
+        if (self.predecessor["id"] is None) or \
+            (is_between(other.id,self.predecessor["id"],self.id,k = 2**self.k) and \
+             other is not None):
                 #print("inside if", self, self.predecessor)
                 self.predecessor = {"id": other.id, "node": other}
         #print("notify -- second if\t self.id:", self.id, "other.id:", other.id,
@@ -199,7 +197,7 @@ class Node:
             (other.predecessor["id"] == self.id) and (self.successor["id"] != other.id):
             self.successor = {"id": other.id, "node": other}
     
-    async def exit(self, network):
+    def exit(self, network):
         # se nodo esce dalla rete deve:
         # 1. controllare che sia il successore del suo predecessore e impostare
         # il successore del suo predecessore come il successore del nodo che esce
@@ -209,23 +207,23 @@ class Node:
         
         if self.predecessor["node"].successor["node"] == self and \
             self.predecessor["id"] is not None:
-            self.predecessor.successor = self.successor
+            self.predecessor["node"].successor = self.successor
         if self.successor["node"].predecessor["node"] == self and \
             self.predecessor["id"] is not None:
-            self.successor.predecessor = self.predecessor
+            self.successor["node"].predecessor = self.predecessor
         
         self.move_resources(self.successor["node"], exit = True)
         network.nodes[self.id] = None
 
-    async def fix_fingers(self):
+    def fix_fingers(self):
         # periodically refresh finger table entries
         i = np.random.randint(low = 0, high = self.k)
         #print("i", i)
         #print("starting id:", (self.id + 2**i) % 2**self.k)
         self.FT[i] = self.__find_successor((self.id + 2**i) % 2**self.k)
     
-    async def fix_successor_list(self):
-        i = np.random.randint(low = 0, high = self.__DIRECT_SUCC)
+    def fix_successor_list(self):
+        i = np.random.randint(low = 1, high = self.__DIRECT_SUCC)
         x = self.successor["node"]
         for _ in range(i):
             x = x.successor["node"]
