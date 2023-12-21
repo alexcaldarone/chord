@@ -169,19 +169,21 @@ class Node:
         #print("stabilize", self)
         #print(self.predecessor)
         # sometimes we get a case of a None successor - is there a bug somewhere?
+        # could derive from a node fail
         if network.nodes[self.successor["id"]] is None:
             return
-        predessor_dict = network.nodes[self.successor["id"]].predecessor
-        x_id, x_node = predessor_dict["id"], predessor_dict["node"] # prendo il predecessore del successore sull'anello
-        #print("x id and node", x_id, x_node)
-        #print("self.id", self.id)
-        #print("self.successor", self.successor)
-        #print(f"{x_id is not None and x_node is not None}")
-        if (x_id is not None and x_node is not None):
-            if is_between(x_id, self.id, self.successor["id"], k = self.k):
-                self.successor = {"id": x_id, "node": x_node}
+        else:
+            predessor_dict = network.nodes[self.successor["id"]].predecessor
+            x_id, x_node = predessor_dict["id"], predessor_dict["node"] # prendo il predecessore del successore sull'anello
+            #print("x id and node", x_id, x_node)
+            #print("self.id", self.id)
+            #print("self.successor", self.successor)
+            #print(f"{x_id is not None and x_node is not None}")
+            if (x_id is not None and x_node is not None):
+                if is_between(x_id, self.id, self.successor["id"], k = self.k):
+                    self.successor = {"id": x_id, "node": x_node}
 
-        network.nodes[self.successor["id"]].notify(self)
+            network.nodes[self.successor["id"]].notify(self)
 
     def notify(self, other):
         # cambia la funzione is between cosi 
