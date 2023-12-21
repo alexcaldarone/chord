@@ -26,9 +26,9 @@ class DistributedHashTable:
         
         idx = int(self.start)
 
-        while self.nodes[idx].successor != self.start:
+        while self.nodes[idx].successor["id"] != self.start:
             yield self.nodes[idx]
-            idx = (self.nodes[idx].successor) % (2 ** self.k - 1)
+            idx = (self.nodes[idx].successor["id"] + 1) % (2 ** self.k - 1)
         # nel ciclo while rimase escluso l'ultimo, lo faccio qui
         yield self.nodes[idx]
     
@@ -59,10 +59,13 @@ class DistributedHashTable:
     def linear_search_resource(self, node_id: int, resource_id: int, k = 0):
         node = self[node_id]
 
-        if node.predecessor["id"] is not None:
+        if self.counter >= 1:
             # there's more than one node in the network
             while not is_between(resource_id, node.predecessor["id"], node.id,
-                                include_lower=True):
+                                 k = 2**self.k, include_lower=True):
+                # block cases where it goes into an infinite loop
+                if k > 2**(self.k + 1): 
+                    raise LookupError("Resource not found in DHT")
                 node = node.successor["node"]
                 k += 1
         

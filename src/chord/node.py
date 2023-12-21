@@ -49,7 +49,7 @@ class Node:
                        k = 2**self.k):
             self.resources.add_resource(value)
         else:
-            raise Exception("Cannot resource with this id on this node")
+            raise Exception("Cannot add resource with this id on this node")
     
     def get_closest(self, resource_id: int) -> Dict:
         # find the closest inedx in the finger table to the resource index
@@ -92,6 +92,7 @@ class Node:
         
         network.nodes[self.id] = self
         network.counter += 1
+        network.start = min(network.start, self.id)
         #print("inside join", network.nodes)
         if other == None:
             self.predecessor = {"id": None, "node": None}
@@ -100,8 +101,14 @@ class Node:
             if self.id == other.id:
                 raise RuntimeError("Cannot have two nodes with same id in network")
             
-            self.predecessor = {"id": None, "node": None}
             self.successor = other.__find_successor(self.id)
+            if self.successor["node"].predecessor["id"] is not None:
+                # divento il successore del predecessore del mio successore
+                self.successor["node"].predecessor["node"].successor = {"id": self.id, "node": self}
+                # il mio predecessore è il predecessore del mio successore
+                self.predecessor = self.successor["node"].predecessor
+                self.successor["node"].predecessor = {"id": self.id, "node": self}
+
             # as suggested by the paper, we inherit the FT 
             # from the neighbouring node
             self.__init_empty_ft()
@@ -137,6 +144,7 @@ class Node:
             # per evitare loop infinito
             if n_first == old_n_first: break
         return n_first
+    
 
     def __closest_preceding_finger(self, id: int):
         # return closest finger preceding id
@@ -160,6 +168,9 @@ class Node:
         # and tell the other successor about it
         #print("stabilize", self)
         #print(self.predecessor)
+        # sometimes we get a case of a None successor - is there a bug somewhere?
+        if network.nodes[self.successor["id"]] is None:
+            return
         predessor_dict = network.nodes[self.successor["id"]].predecessor
         x_id, x_node = predessor_dict["id"], predessor_dict["node"] # prendo il predecessore del successore sull'anello
         #print("x id and node", x_id, x_node)
@@ -178,6 +189,8 @@ class Node:
         #print("notify")
         #print("self", self, "other", other)
         #print("self.predecessor", self.predecessor)
+        if other is None:
+            return
         if (self.predecessor["id"] is None) or \
             (is_between(other.id,self.predecessor["id"],self.id,k = 2**self.k) and \
              other is not None):
@@ -198,26 +211,23 @@ class Node:
             self.successor = {"id": other.id, "node": other}
     
     def exit(self, network):
-        # se nodo esce dalla rete deve:
-        # 1. controllare che sia il successore del suo predecessore e impostare
-        # il successore del suo predecessore come il successore del nodo che esce
-        # sono l'unico nodo presente
-        if self.successor["id"] is None:
+        # se è unico nodo nella reta
+        if self.successor["id"] is None or self.predecessor["id"] is None:
             network.nodes[self.id] = None
-        
-        if self.predecessor["node"].successor["node"] == self and \
-            self.predecessor["id"] is not None:
-            self.predecessor["node"].successor = self.successor
-        if self.successor["node"].predecessor["node"] == self and \
-            self.predecessor["id"] is not None:
-            self.successor["node"].predecessor = self.predecessor
-        
-        self.move_resources(self.successor["node"], exit = True)
+        else: # altrimenti aggiusta riferimenti
+            if self.predecessor["node"].successor["node"] == self and \
+                self.predecessor["id"] is not None:
+                self.predecessor["node"].successor = self.successor
+            if self.successor["node"].predecessor["node"] == self and \
+                self.predecessor["id"] is not None:
+                self.successor["node"].predecessor = self.predecessor
+                self.move_resources(self.successor["node"], exit = True)
+        network.counter -= 1
         network.nodes[self.id] = None
 
     def fix_fingers(self):
         # periodically refresh finger table entries
-        i = np.random.randint(low = 0, high = self.k)
+        i = np.random.randint(low = 1, high = self.k)
         #print("i", i)
         #print("starting id:", (self.id + 2**i) % 2**self.k)
         self.FT[i] = self.__find_successor((self.id + 2**i) % 2**self.k)
@@ -233,7 +243,11 @@ class Node:
         if exit:
             # we are leaving the network, move our resources to our successor
             # assumes we have already fixed successor and predecessor pointers
-            for res in self.resources: other.add_resource(res)
+            for res in self.resources: 
+                try:
+                    other.add_resource(res)
+                except:
+                    continue # in this case the resource goes lost
         else:
             # we are joining the network
             # ask other to give us the resources we are now in charge of
