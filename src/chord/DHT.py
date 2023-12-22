@@ -1,12 +1,12 @@
-from typing import Any, List, Tuple, Optional, NewType, Union
+from typing import Tuple
 import math
 
 from node import Node
-from resources import Resource
 from helpers import is_between
 
 class DistributedHashTable:
-    def __init__(self, k: int):
+    def __init__(self, 
+                 k: int):
         self.counter: int = 0
         self.k: int = k
         self.nodes: list[Node] = [None for _ in range(0, 2**k)]
@@ -16,12 +16,16 @@ class DistributedHashTable:
     def is_empty(self) -> bool:
         return self.counter == 0
     
-    def __getitem__(self, idx):
+    def __getitem__(self, 
+                    idx:int) -> Node:
         if self.nodes[idx] == None:
             raise IndexError("Cannot index where there is no node")
         return self.nodes[idx]
     
-    def linear_search_resource(self, node_id: int, resource_id: int, k = 0):
+    def linear_search_resource(self, 
+                               node_id: int, 
+                               resource_id: int, 
+                               k: int = 0) -> Tuple[Node, int]:
         node = self[node_id]
 
         if self.counter >= 1:
@@ -39,19 +43,16 @@ class DistributedHashTable:
         else:
             raise LookupError("Resource not found in DHT")
     
-    def search(self, resource_id: int, node_id: int, k = 0):
-        #node_id = self.start if node_id is None else node_id
+    def search(self, 
+               resource_id: int, 
+               node_id: int, 
+               k: int = 0) -> Tuple[Node, int]:
         # logarithmic research
         node = self[node_id]
-        #print(node.FT)
-        #print("res:", resource_id, "node:", node)
-        #print("node FT", node.FT)
         if node.is_in(resource_id):
             return node, k
         else:
-            new_node_idx, new_node, succ = node.get_closest(resource_id)
-            #print("new_node_idx", new_node_idx)
-            #print(new_node)
+            _, new_node, succ = node.get_closest(resource_id)
             if succ:
                 if new_node.is_in(resource_id):
                     return new_node, k+1
