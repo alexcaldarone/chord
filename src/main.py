@@ -7,6 +7,9 @@ from chord.DHT import DistributedHashTable
 from chord.node import Node
 from chord.resources import Resource
 
+# code has been changes since this file was last run
+# there's a possibility it wont work anymore
+
 if __name__ == "__main__":
     ks = [3, 4, 5, 6, 7, 8, 9, 10 , 11]
     LIST_TO_ADD_TO_DF = []
