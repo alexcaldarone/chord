@@ -90,7 +90,9 @@ class ProtocolSimulator:
                                                 size = 1)[0]
             self.network[random_node_fix_id].fix_successor_list()
     
-    def periodic_stabilization_procedures(self, event):
+    def periodic_stabilization_procedures(self, 
+                                          event: Event,
+                                          sleep_time: float):
         while True:
             if event.is_set():
                 break
@@ -98,13 +100,14 @@ class ProtocolSimulator:
             self.stabilize_network()
             self.fix_fingers()
             self.fix_successor_list()
-            time.sleep(0.5)
+            time.sleep(sleep_time)
     
     def simulate_epochs(self,
                         n_epochs: int,
                         node_join_prob: float,
                         node_failure_prob: float,
                         exit_event: Event,
+                        sleep_time: float,
                         save_data: bool,
                         df: Union[pd.DataFrame, None]):
         for epoch in range(n_epochs):
@@ -164,19 +167,23 @@ class ProtocolSimulator:
                     fails = (node_fails, rand_node_to_fail_id if node_fails else 0)
                 df.loc[len(df)] = (epoch, self.network.counter, node_joins,
                                    rand_id_choice if node_joins else 0,  *fails, *search_res)
-            time.sleep(1)
+            time.sleep(sleep_time)
         exit_event.set()
 
     def simulate(self,
                  n_epochs: int,
                  node_join_probability: float,
                  node_failure_probability: float,
+                 stab_sleep: float,
+                 epoch_sleep: float,
                  save_data: bool) -> Union[pd.DataFrame, None]:
         print("""
         **********************************************************
         * Welcome to the simulaiton, Neo ...                     *
         **********************************************************
         """)
+        assert stab_sleep < epoch_sleep
+
         if save_data:
             df = pd.DataFrame(columns = [
                 "epoch", "n_nodes", "node_join", "node_join_id", "node_fail",
@@ -191,10 +198,12 @@ class ProtocolSimulator:
                                                            node_join_probability,
                                                            node_failure_probability,
                                                            exit_event,
+                                                           epoch_sleep,
                                                            save_data,
                                                            df))
         p1.start()
-        p2 = Thread(target = self.periodic_stabilization_procedures, args = (exit_event,))
+        p2 = Thread(target = self.periodic_stabilization_procedures, args = (exit_event,
+                                                                             stab_sleep,))
         p2.start()
         p1.join()
         p2.join()
