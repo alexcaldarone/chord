@@ -6,8 +6,8 @@ from typing import Tuple, Union, NewType
 
 NaNType = NewType("NaN", np.nan)
 
-from DHT import DistributedHashTable
-from node import Node
+from chord.DHT import DistributedHashTable
+from chord.node import Node
 
 class ProtocolSimulator:
     
@@ -174,9 +174,9 @@ class ProtocolSimulator:
                  n_epochs: int,
                  node_join_probability: float,
                  node_failure_probability: float,
-                 stab_sleep: float,
-                 epoch_sleep: float,
-                 save_data: bool) -> Union[pd.DataFrame, None]:
+                 save_data: bool,
+                 stab_sleep: float = 0.5,
+                 epoch_sleep: float = 1,) -> Union[pd.DataFrame, None]:
         print("""
         **********************************************************
         * Welcome to the simulaiton, Neo ...                     *

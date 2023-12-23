@@ -1,8 +1,8 @@
 from typing import Any, Optional, List, NewType, Dict, Union, Tuple
 import numpy as np
 
-from helpers import is_between
-from resources import ResourceStorage, Resource
+from chord.helpers import is_between
+from chord.resources import ResourceStorage, Resource
 
 class Node:
     """

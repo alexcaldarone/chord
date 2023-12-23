@@ -1,8 +1,8 @@
 from typing import Tuple
 import math
 
-from node import Node
-from helpers import is_between
+from chord.node import Node
+from chord.helpers import is_between
 
 class DistributedHashTable:
     def __init__(self, 
