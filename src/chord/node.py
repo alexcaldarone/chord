@@ -1,8 +1,10 @@
-from typing import Any, Optional, List, NewType, Dict, Union, Tuple
+from typing import Any, Dict, Union, Tuple, TypeVar
 import numpy as np
 
 from chord.helpers import is_between
 from chord.resources import ResourceStorage, Resource
+
+DistributedHashTable = TypeVar("DistributedHashTable")
 
 class Node:
     """
@@ -79,7 +81,7 @@ class Node:
         self.successor_list = [{"id":id, "node":node} for _ in range(self.__DIRECT_SUCC)]
     
     def join(self, 
-             network, 
+             network: DistributedHashTable, 
              other = None):
         if network.counter == 2**self.k:
             raise Exception("Cannot add node to a full DHT")
@@ -139,7 +141,7 @@ class Node:
         return (self.id, self)
 
     def stabilize(self, 
-                  network):
+                  network: DistributedHashTable):
         # periodically verify the node's immediate successor
         # and tell the other successor about it
         if self.successor["id"] is None or \
@@ -176,7 +178,7 @@ class Node:
             self.successor = {"id": other.id, "node": other}
     
     def exit(self, 
-             network):
+             network: DistributedHashTable):
         # se è unico nodo nella rete
         if self.successor["id"] is None or self.predecessor["id"] is None:
             network.nodes[self.id] = None
