@@ -180,7 +180,7 @@ class Node:
     def exit(self, 
              network: DistributedHashTable):
         # se è unico nodo nella rete
-        if self.successor["id"] is None or self.predecessor["id"] is None:
+        if network.counter == 1:
             network.nodes[self.id] = None
         else: # altrimenti aggiusta riferimenti
             if self.predecessor["node"].successor["node"] == self and \
