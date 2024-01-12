@@ -142,7 +142,8 @@ class Node:
                   network):
         # periodically verify the node's immediate successor
         # and tell the other successor about it
-        if network.nodes[self.successor["id"]] is None:
+        if self.successor["id"] is None or \
+            network.nodes[self.successor["id"]] is None: # check to avoid error during simulation
             return
         else:
             # prendo il predecessore del successore sull'anello
@@ -152,15 +153,15 @@ class Node:
             if (x_id is not None and x_node is not None):
                 if is_between(x_id, self.id, self.successor["id"], k = self.k):
                     self.successor = {"id": x_id, "node": x_node}
-            
-            network.nodes[self.successor["id"]].notify(self)
+            if network.nodes[self.successor["id"]] is not None: # predecessore del mio successore è sbagliato
+                network.nodes[self.successor["id"]].notify(self)
 
     def notify(self, 
                other):
         if other is None:
             return
         if (self.predecessor["id"] is None) or \
-            (is_between(other.id,self.predecessor["id"],self.id,k = 2**self.k) and \
+            (is_between(other.id, self.predecessor["id"], self.id, k = 2**self.k) and \
              other is not None):
                 self.predecessor = {"id": other.id, "node": other}
         if (self.successor["id"] is not None) and is_between(self.id,
