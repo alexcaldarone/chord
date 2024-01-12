@@ -33,21 +33,18 @@ parser.add_argument("--epoch_sleep", type = float, required = False,
 if __name__ == "__main__":
     args = parser.parse_args()
     p = ProtocolSimulator(args.k)
-    try:
-        if args.stab_sleep is None and args.epoch_sleep is None:
-            res = p.simulate(n_epochs=args.n_epochs, 
-                            node_join_probability=args.node_join_prob,
-                            node_failure_probability=args.node_fail_prob,
-                            save_data=args.save_data)
-        else:
-            res = p.simulate(n_epochs=args.n_epochs, 
-                            node_join_probability=args.node_join_prob,
-                            node_failure_probability=args.node_fail_prob,
-                            save_data=args.save_data,
-                            stab_sleep=args.stab_sleep,
-                            epoch_sleep=args.epoch_sleep)
-    except KeyboardInterrupt:
-        exit()
+    if args.stab_sleep is None and args.epoch_sleep is None:
+        res = p.simulate(n_epochs=args.n_epochs, 
+                        node_join_probability=args.node_join_prob,
+                        node_failure_probability=args.node_fail_prob,
+                        save_data=args.save_data)
+    else:
+        res = p.simulate(n_epochs=args.n_epochs, 
+                        node_join_probability=args.node_join_prob,
+                        node_failure_probability=args.node_fail_prob,
+                        save_data=args.save_data,
+                        stab_sleep=args.stab_sleep,
+                        epoch_sleep=args.epoch_sleep)
     
     if True:
         path_to_here = os.path.abspath(os.getcwd())
