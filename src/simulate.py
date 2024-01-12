@@ -1,6 +1,7 @@
 import argparse
 import os
 import datetime
+from distutils.util import strtobool
 
 from chord.protocol import ProtocolSimulator
 
@@ -23,7 +24,7 @@ parser.add_argument("-j", "--node_join_prob", type = float, required = True,
                     help = "Probability with which there is a join during an epoch")
 parser.add_argument("-f", "--node_fail_prob", type = float, required = True,
                     help = "Probability with which there is a fail during an epoch")
-parser.add_argument("-s", "--save_data", type = bool, required = True,
+parser.add_argument("-s", "--save_data", type = strtobool, required = True,
                     help = "Whether to save simulation data or not")
 parser.add_argument("--stab_sleep", type = float, required = False,
                     help = "Pause between one stabilization and another (you must set both this and epoch_sleep)")
@@ -46,7 +47,7 @@ if __name__ == "__main__":
                         stab_sleep=args.stab_sleep,
                         epoch_sleep=args.epoch_sleep)
     
-    if True:
+    if args.save_data == True:
         path_to_here = os.path.abspath(os.getcwd())
         path_to_data = path_to_here[:-3] + "data"
         
