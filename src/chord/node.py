@@ -96,13 +96,7 @@ class Node:
             if self.id == other.id:
                 raise RuntimeError("Cannot have two nodes with same id in network")
             
-            old_other = other
-            #print("before finding successor:", old_other)
             self.successor = other.__find_successor(self.id)
-            #print("right after finding successor", other)
-            #print("successore trovato da nodo bootsrap:", self.successor)
-            # questo pezzo di codice dentro l'if è quello che sta causano problemi al nodo 
-            # bootstrap
             if self.successor["node"].predecessor["id"] is not None:
                 # il mio predecessore è il predecessore del mio successore
                 self.predecessor = self.successor["node"].predecessor
@@ -110,19 +104,11 @@ class Node:
                 self.successor["node"].predecessor = {"id": self.id, "node": self} # pred del mio succ sono io 
                 self.predecessor["node"].successor = {"id": self.id, "node": self} # succ del mio pred sono io"""
             
-            #if self.successor == other:
-            #    print(f"successore del nodo {self} è diventato other {other}")
-            # as suggested by the paper, we inherit the FT from the neighbouring node
             self.__init_empty_ft()
-            # aggiungi funzione per controllare se si devono spostare risorse
-            #print("other after the node joins:", other)
-            #print("what is in network:", network.nodes[other.id])
 
     def __find_successor(self, 
                          id: int) -> Dict:
         n_first = self.__find_predecessor(id)
-        #print("dentro __find_successor, ispeziono other:", n_first)
-        #print("dentro __find_successor, n_first.successor:", n_first.successor)
         return n_first.successor
     
     def __find_predecessor(self, 
@@ -193,8 +179,6 @@ class Node:
         # se è unico nodo nella rete
         if network.counter > 1:
             if self.predecessor["id"] is not None:
-                    print("self.successor:", self.successor)
-                    print("----> in exit: predecessor pointer is correct")
                     # primo indice dove ho un elemento diverso da me
                     for i in range(len(self.successor_list)):
                         if self.successor_list[i]["id"] != self.id:
@@ -203,15 +187,11 @@ class Node:
                     self.predecessor["node"].successor = self.successor_list[idx]
                     self.predecessor["node"].stabilize(network)
             if self.successor["id"] is not None:
-                print("----> in exit: successor pointer is correct")
                 self.successor["node"].predecessor = self.predecessor
                 self.move_resources(self.successor["node"], exit = True)
                 self.successor["node"].stabilize(network)
         network.counter -= 1
         network.nodes[self.id] = None
-        # stabilizzo i nodi dopo l'exit
-        #if self.predecessor["id"] is not None: self.predecessor["node"].stabilize(network)
-        #if self.successor["id"] is not None: self.successor["node"].stabilize(network)
 
     def fix_fingers(self):
         # periodically refresh finger table entries

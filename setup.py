@@ -12,6 +12,3 @@ setup(name="Chord Protocol simulator",
       ],
       install_data = False
       )
-
-# add python_requires, install_requires, install_data and long description
-# look up examples

@@ -124,39 +124,30 @@ class ProtocolSimulator:
                     if self.network.counter >= 1:
                         boot_id = np.random.choice(self._used_node_ids, size = 1)[0]
                         boot_node = self.network[boot_id]
-                        #print("nodo bootstrap:", boot_node)
                     else:
                         boot_node = None
                     self.node_join(node_to_add, boot_node)
                     print(f"--- Node with id {rand_id_choice} joined the network")
-                    #print(node_to_add)
                 else:
                     print(f"--- No node joins the network at this epoch")
             else:
                 print("--- Can't add node to a full network")
-            
-            #print("after join")
-            #print(self.network.nodes)
 
             # probabilistic node failure
             if self.network.counter > 0:
                 node_fails = np.random.choice([0,1], size = 1,
                                             p = [1 - node_failure_prob, node_failure_prob])[0]
                 if node_fails:
-                    #print("BEFORE EXIT")
-                    #print(self.network.nodes)
                     rand_node_to_fail_id = np.random.choice(self._used_node_ids, size = 1)[0]
                     self.manage_node_fail(rand_node_to_fail_id)
                     print(f"--- Node with id {rand_node_to_fail_id} exited the network")
                 else:
                     print(f"--- No node exits the network at this epoch")
             
-            #print(self.network.nodes)
             # search
             if self.network.counter > 0:
                 rand_node_begin_search = np.random.choice(self._used_node_ids, size = 1)[0]
                 rand_res_to_find = np.random.choice(self._resource_ids, size = 1)[0]
-                #print("node starting search:", rand_node_begin_search, "resource:", rand_res_to_find)
                 solver, jumps, how = self.search(rand_node_begin_search, rand_res_to_find)
                 if jumps is np.nan:
                     print(f"--- Resource was not found (search failed)")
@@ -220,7 +211,5 @@ class ProtocolSimulator:
         * Sadly, you are exiting the simulation...               *
         **********************************************************
         """)
-
-        print(df["how"].value_counts())
 
         return df
