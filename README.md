@@ -8,6 +8,7 @@ To clone the repository run:
 ```shell
 git clone https://github.com/alexcaldarone/chord.git
 cd chord
+python setup.py install
 ```
 
 To see the parameters of the simulation execute:
