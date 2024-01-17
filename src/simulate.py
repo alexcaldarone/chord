@@ -1,7 +1,7 @@
 import argparse
 import os
 import datetime
-from distutils.util import strtobool
+from setuptools._distutils.util import strtobool
 
 from chord.protocol import ProtocolSimulator
 
