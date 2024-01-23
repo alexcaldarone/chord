@@ -27,3 +27,4 @@ python simulate.py 11 -n 1000 -j 0.8 -f 0.2
 - [ ] Improve exit procedure of nodes (make use of successors list) as it is causing searches to fail 
 - [ ] Improve FT (just use node instead of dictionary? Do i need to refactor some code in Node class?)
 - [ ] Change node failure probability from fixed to variable (can assume several different values during the simulation)
+- [ ] Add tqdm to time simulations and add a printed summary at the end
